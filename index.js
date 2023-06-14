@@ -10,7 +10,7 @@ const app = express();
 const PORT = config.PORT;
 const NODE_ENV = config.NODE_ENV;
 
-app.use('/api/v1/', indexRouter);
+app.use('/api/v1', indexRouter);
 
 //Error Handling for unmatched routes
 app.use((req, res, next) => {
