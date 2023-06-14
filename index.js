@@ -5,9 +5,17 @@ import { dbconnection } from './config/db.config.js';
 
 dbconnection();
 
+//json data error setting
+
+
 const app = express();
 
-const PORT = config.PORT;
+// parse application/json
+app.use(express.json());
+// parse application/x-www-form-urlencoded
+app.use(express.urlencoded({extended: true}));
+
+const PORT = config.PORT || 8080;
 const NODE_ENV = config.NODE_ENV;
 
 app.use('/api/v1', indexRouter);

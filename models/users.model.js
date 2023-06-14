@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
-import {validataionMessage} from '../constants/validataionMessage.js'
+import {validataionMessage} from '../constants/validataionMessage.js';
+import bcrypt from 'bcrypt'
+
+
 const usersSchema = mongoose.Schema({
     name:{
         type: String,
         required: [true, validataionMessage.REQUIRED_NAME_MESSAGE],
     },
-
-
     email:{
         type: String,
         required: [true, validataionMessage.REQUIRED_EMAIL_MESSAGE],
@@ -26,6 +27,7 @@ const usersSchema = mongoose.Schema({
             validataionMessage.MATCH_PASSWORD_MESSAGE
         ]
     },
+    jwt_token: String,
     resetPassword: String,
     resetPasswordExpired: {
         type: Date,
@@ -36,6 +38,23 @@ const usersSchema = mongoose.Schema({
 },
 {
     timestamps: true,
+})
+
+usersSchema.methods.validPassword = async function(pwd){
+    return await bcrypt.compare(pwd, this.password);
+}
+
+usersSchema.pre('save', async function (next) {    
+    const password = this.password;
+    //console.log(this.password);
+    //console.log(password);
+    //generate salt
+    const genSalt = await bcrypt.genSalt(10);
+    const encryptPassword = await bcrypt.hash(password.toString(), genSalt);
+    //console.log(encryptPassword); 
+    this.password = encryptPassword;
+    //req.body.password = encryptPassword;
+    next();
 })
 
 const User = mongoose.model('User', usersSchema);
