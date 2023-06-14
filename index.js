@@ -1,15 +1,14 @@
-import express, { response } from 'express';
-import 'dotenv/config'
+import express from 'express';
 import indexRouter from './routes/index.route.js';
 import config from './config/config.js';
 import { dbconnection } from './config/db.config.js';
 
-const app = express();
-
 dbconnection();
 
-const PORT = process.env.PORT;
-const NODE_ENV = process.env.NODE_ENV;
+const app = express();
+
+const PORT = config.PORT;
+const NODE_ENV = config.NODE_ENV;
 
 app.use('/api/v1/', indexRouter);
 
@@ -27,6 +26,6 @@ app.use((error, req, res, next) => {
     })
 })
 
-app.listen(config.PORT, () => {
-    console.log(`Server running in ${config.NODE_ENV} at port ${config.PORT}`)
+app.listen(PORT, () => {
+    console.log(`Server running in ${NODE_ENV} at port ${PORT}`)
 })
