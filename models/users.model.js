@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 import {validataionMessage} from '../constants/validataionMessage.js';
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 
 
-const usersSchema = mongoose.Schema({
+const userSchema = mongoose.Schema({
     name:{
         type: String,
         required: [true, validataionMessage.REQUIRED_NAME_MESSAGE],
@@ -40,11 +41,11 @@ const usersSchema = mongoose.Schema({
     timestamps: true,
 })
 
-usersSchema.methods.validPassword = async function(pwd){
+userSchema.methods.validPassword = async function(pwd){
     return await bcrypt.compare(pwd, this.password);
 }
 
-usersSchema.pre('save', async function (next) {    
+userSchema.pre('save', async function (next) {    
     const password = this.password;
     //console.log(this.password);
     //console.log(password);
@@ -55,8 +56,18 @@ usersSchema.pre('save', async function (next) {
     this.password = encryptPassword;
     //req.body.password = encryptPassword;
     next();
-})
+});
 
-const User = mongoose.model('User', usersSchema);
+//hash token and expire reset token
+userSchema.methods.getResetToken = function(){
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    //console.log(resetToken);
+    this.resetPasswordToken = crypto.createHash('sha512').update(resetToken).digest('hex');
+    this.resetPasswordExpired = Date.now() + 10*60*1000;
+    console.log(this.resetPasswordExpired, Date.now())
+    return resetToken;
+}
+
+const User = mongoose.model('User', userSchema);
 
 export default User;

@@ -4,6 +4,7 @@ import config from "../config/config.js";
 //const { Jwt } = pkg;
 
 import jwt from 'jsonwebtoken'
+import { sendEmail } from "../utils/sendEmail.js";
 export const registerUser =  async(req, res) => {    
     try {
         const {name, email, password} = req.body;
@@ -15,9 +16,9 @@ export const registerUser =  async(req, res) => {
         }
             
         //const user = User.findOne({email: email});
-        const user = await User.find({ email: email });
+        const user = await User.findOne({ email });
         console.log(user);
-        if(user.length > 0){
+        if(user){
             res.status(400).json({
                 status:false,
                 message: 'The user has already registered.'
@@ -81,6 +82,84 @@ export const loginUser = async (req, res) => {
             });
                                          
         }  
+    } catch (error) {
+        res.status(400).json({
+            status:false,
+            message: error.message
+        });
+    }
+}
+//profile page personal
+export const userProfileMe = async (req, res) => {
+    try {
+        //console.log(req.user.id);
+        const user = await User.findOne({_id: req.user.id});
+        //console.log(user.jwt_token);
+        if(user){            
+            res.status(200).json({
+                status:true, 
+                data: user,      
+                message: 'User profile fetch successfully',
+            });
+        } else {
+            res.status(200).json({
+                status:false,        
+                message: 'No user found',
+            });
+        }
+    } catch (error) {
+        res.status(400).json({
+            status:false,
+            message: error.message
+        });
+    }
+}
+//logout user
+export const logoutUser = async (req, res) => {
+    try {
+        //console.log(req.user.id);
+        const user = await User.findOne({_id: req.user.id});
+        //console.log(user.jwt_token);
+        if(user && user.jwt_token   !== "undefined"){
+            const updateUserLogout = await User.findOneAndUpdate({_id: req.user.id}, {$set:{jwt_token: "undefined"}}, {new: true});
+            res.status(200).json({
+                status:true,        
+                message: 'User successfully logout',
+            });
+        } else {
+            res.status(200).json({
+                status:false,        
+                message: 'User has already logout',
+            });
+        }
+    } catch (error) {
+        res.status(400).json({
+            status:false,
+            message: error.message
+        });
+    }
+}
+
+export const forgetPassword = async(req, res) => {
+    try {
+        const {email} = req.body;
+        const user = await User.findOne({email: email});
+        if(!user){
+            res.status(400).json({
+                status:false,
+                message: 'No user found'
+            });
+        }
+
+        const resetToken = user.getResetToken();
+        console.log(resetToken);
+        const mailMessage = 'your are using. Your reset token is '+ resetToken;
+        await sendEmail({
+            email: user.email,
+            subject: 'Password reset token',
+            mesage: mailMessage,
+        })
+        
     } catch (error) {
         res.status(400).json({
             status:false,
