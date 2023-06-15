@@ -8,7 +8,7 @@ const config = {
     SMTP_PORT: process.env.SMTP_PORT,
     SMTP_HOST: process.env.SMTP_HOST,
     SMTP_USER: process.env.SMTP_USER,
-    SMPT_PASS: process.env.SMPT_PASS,
+    SMTP_PASSWORD: process.env.SMTP_PASSWORD,
 }
 
 export default config;

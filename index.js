@@ -9,11 +9,12 @@ import { createLogger, format, transports } from 'winston';
 
 dbconnection();
 
-//json data error setting
+
 
 
 const app = express();
 
+//json data error setting
 // parse application/json
 app.use(express.json());
 // parse application/x-www-form-urlencoded

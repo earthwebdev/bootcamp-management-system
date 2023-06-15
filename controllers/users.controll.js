@@ -152,13 +152,15 @@ export const forgetPassword = async(req, res) => {
         }
 
         const resetToken = user.getResetToken();
-        console.log(resetToken);
+        //console.log(resetToken);
         const mailMessage = 'your are using. Your reset token is '+ resetToken;
         await sendEmail({
-            email: user.email,
+            //email: user.email,
+            from: "Mailtrap <info@mailtrap.io>", // sender address
+            to: "earthweb21st@gmail.com", // list of receivers with comma separators
             subject: 'Password reset token',
-            mesage: mailMessage,
-        })
+            html: mailMessage, 
+        } );    
         
     } catch (error) {
         res.status(400).json({

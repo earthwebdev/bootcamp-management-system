@@ -19,7 +19,7 @@ router.post('/updateDetails', registerUser);
 
 router.post('/updatePassword', registerUser);
 
-router.post('/forgotpassword', forgetPassword);
+router.get('/forgotpassword', forgetPassword);
 
 router.post('/resetPassword/:resettoken', registerUser);
 
