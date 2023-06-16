@@ -1,7 +1,7 @@
 import express from "express";
 
-import {registerUser, loginUser, forgetPassword, logoutUser, userProfileMe} from '../controllers/users.controll.js';
-import {authMiddleware} from '../middlewares/auth.middleware.js'
+import {registerUser, loginUser, forgetPassword, logoutUser, userProfileMe, resetPassword, usersListsForAdmin, CreateUserByAdmin, updateUserByAdmin, deleteUserByAdmin} from '../controllers/users.controll.js';
+import {authMiddleware, authorize} from '../middlewares/auth.middleware.js'
 
 const router = express.Router();
 
@@ -15,13 +15,28 @@ router.patch('/logout',authMiddleware, logoutUser);
 ////send auth token // get current user details from auth token and send a response to user
 router.get('/user/me', authMiddleware, userProfileMe);
 
-router.post('/updateDetails', registerUser);
+router.put('/updateDetails', registerUser);
 
-router.post('/updatePassword', registerUser);
+//old password to new password reset
+router.put('/updatePassword', authMiddleware, registerUser);
+//req.body.oldpassword / req.body.newpassword
 
-router.get('/forgotpassword', forgetPassword);
+router.put('/forgotpassword', forgetPassword);                              
 
-router.post('/resetPassword/:resettoken', registerUser);
+router.post('/resetpassword/:resettoken', resetPassword);
 
+//only admin previlage
+router.get('/admin',authMiddleware, authorize('admin'), usersListsForAdmin);
+
+router.post('/admin',authMiddleware, authorize('admin'), CreateUserByAdmin);
+
+router.patch('/admin/:userid',authMiddleware, authorize('admin'), updateUserByAdmin);
+
+router.delete('/admin/:userid',authMiddleware, authorize('admin'), deleteUserByAdmin); 
+
+//docker
+//multer
+//swagger
+//JEST
 
 export default router;

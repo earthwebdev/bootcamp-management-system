@@ -5,6 +5,10 @@ import config from "../config/config.js";
 
 import jwt from 'jsonwebtoken'
 import { sendEmail } from "../utils/sendEmail.js";
+import crypto from 'crypto';
+
+import bcrypt from 'bcrypt';
+
 export const registerUser =  async(req, res) => {    
     try {
         const {name, email, password} = req.body;
@@ -144,6 +148,8 @@ export const forgetPassword = async(req, res) => {
     try {
         const {email} = req.body;
         const user = await User.findOne({email: email});
+                                //.select('name email  resetPasswordToken resetPasswordExpired');
+        //console.log(user);return;
         if(!user){
             res.status(400).json({
                 status:false,
@@ -152,15 +158,35 @@ export const forgetPassword = async(req, res) => {
         }
 
         const resetToken = user.getResetToken();
-        //console.log(resetToken);
-        const mailMessage = 'your are using. Your reset token is '+ resetToken;
-        await sendEmail({
-            //email: user.email,
-            from: "Mailtrap <info@mailtrap.io>", // sender address
-            to: "earthweb21st@gmail.com", // list of receivers with comma separators
-            subject: 'Password reset token',
-            html: mailMessage, 
-        } );    
+        console.log(resetToken);
+        const mailMessage = 'your are using. Your reset token is '+ resetToken + '<br> your token will expire in ten minutes.';
+        //console.log(user);
+        try {
+             await sendEmail({
+                //email: user.email,
+                //from: "Mailtrap <info@bootcamp.com>", // sender address
+                email: user.email, // list of receivers with comma separators
+                subject: 'Password reset token',
+                message: mailMessage, 
+            } ); 
+            
+            
+            await user.save({validateBeforeSave: false});
+            
+        } catch (error) {
+            user.resetPasswordToken = '';
+            user.resetPasswordExpired = '';
+            await user.save({validateBeforeSave: false});
+            res.status(400).json({
+                status:false,
+                message: error.message,
+            });
+        }
+        return  res.status(200).json({
+            status:true,
+            message: 'Email sent successfully.'
+        });
+           
         
     } catch (error) {
         res.status(400).json({
@@ -168,4 +194,69 @@ export const forgetPassword = async(req, res) => {
             message: error.message
         });
     }
+}
+
+export const resetPassword = async (req, res) => {
+    try {
+        //console.log(req.params)
+        const  resetToken = req.params.resettoken;
+        //hashed password
+        const hashToken = crypto.createHash('sha512').update(resetToken).digest('hex');
+        //console.log(hashToken)
+        const user = await User.findOne({resetPasswordToken: hashToken, resetPasswordExpired: { $gte: new Date() }}); 
+        
+        if(!user){
+            res.status(400).json({
+                status:false,
+                message: 'Invalid password token / password expired'
+            });
+        }
+        
+        const hashPass = await hashPassword(req.body.password);
+        const data = {
+            password: hashPass,
+            resetPasswordToken: '',
+            resetPasswordExpired: '', 
+        };
+        await User.findOneAndUpdate({_id: user._id}, {$set: data},
+            {
+                new: true,
+            }
+        );
+        
+        res.status(200).json({
+            status: true,
+            message: 'Password reset successfully',
+        });
+    } catch (error) {        
+        res.status(200).json({
+            status: false,
+            message: error.message,
+        });
+    }
+}
+
+ const hashPassword = async (passwd) => {    
+    //generate salt
+    const genSalt = await bcrypt.genSalt(10);
+    const encryptPassword = await bcrypt.hash(passwd.toString(), genSalt); 
+    return encryptPassword;
+}
+
+//crud operation for the admin role user
+
+export const usersListsForAdmin = async (req, res) => {
+
+}
+
+export const CreateUserByAdmin = async (req, res) => {
+    
+}
+
+export const updateUserByAdmin = async (req, res) => {
+    
+}
+
+export const deleteUserByAdmin = async (req, res) => {
+    
 }

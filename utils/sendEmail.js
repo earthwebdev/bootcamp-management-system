@@ -1,8 +1,7 @@
 import nodemailer from 'nodemailer';
 import config from '../config/config.js';
 
-export const sendEmail = async (content) => {
-  
+export const sendEmail = async (content) => {  
   // Generate test SMTP service account from ethereal.email
   // Only needed if you don't have a real mail account for testing
   let testAccount = await nodemailer.createTestAccount();
@@ -17,9 +16,18 @@ export const sendEmail = async (content) => {
       pass: config.SMTP_PASSWORD, // generated ethereal password
     },
   });
+  const messageContent = {
+    //sender email
+      from: `${config.FROM_NAME} <${config.FROM_EMAIL}>`,
+      //receiver email
+      to: content.email,
+      subject:content.subject,
+      text:content.message,
+  }
+  //console.log(messageContent);
     //console.log(transporter)
   // send mail with defined transport object
-  if(!content){
+ /*  if(!content){
     content = {
       from: "Mailtrap <info@mailtrap.io>", // sender address
       to: "earthweb21st@gmail.com", // list of receivers with comma separators
@@ -27,11 +35,13 @@ export const sendEmail = async (content) => {
       text: "test mail to check for forgotten user", // plain text body
       //html: "<b>Hello world?</b>", // html body
     };
-  }
-  let info = await transporter.sendMail(content);
-  return info;
+  } */
+  let info = await transporter.sendMail(messageContent);
   console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+   // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+  return info;
+  
+ 
 
   // Preview only available when sending through an Ethereal account
   //console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));

@@ -25,3 +25,16 @@ export const authMiddleware = (req, res, next) => {
         });
     }
 }
+
+export const authorize = (...roles) => async (req, res, next) => {
+    console.log(roles);
+    console.log(req.user.role)
+    if(roles.includes(req.user.role)){
+        next();
+    }else{
+        res.status(401).json({
+            status:false,
+            message: 'Your are not a authorize user to access this resources. Please try again',
+        });
+    }
+}
