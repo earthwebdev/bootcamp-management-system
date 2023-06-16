@@ -2,7 +2,7 @@ import User from "../models/users.model.js";
 import config from "../config/config.js";
 //import pkg from 'jsonwebtoken';
 //const { Jwt } = pkg;
-
+import mongoose from "mongoose";
 import jwt from 'jsonwebtoken'
 import { sendEmail } from "../utils/sendEmail.js";
 import crypto from 'crypto';
@@ -21,7 +21,7 @@ export const registerUser =  async(req, res) => {
             
         //const user = User.findOne({email: email});
         const user = await User.findOne({ email });
-        console.log(user);
+        //console.log(user);
         if(user){
             res.status(400).json({
                 status:false,
@@ -97,7 +97,7 @@ export const loginUser = async (req, res) => {
 export const userProfileMe = async (req, res) => {
     try {
         //console.log(req.user.id);
-        const user = await User.findOne({_id: req.user.id});
+        const user = await User.findOne({_id: req.user.id}).select('name email role');
         //console.log(user.jwt_token);
         if(user){            
             res.status(200).json({
@@ -246,17 +246,189 @@ export const resetPassword = async (req, res) => {
 //crud operation for the admin role user
 
 export const usersListsForAdmin = async (req, res) => {
+    try {
+        const users = await User.find().sort('createdAt -1');
+        //console.log(users);
+        if(users){
+            res.status(200).json({
+                status: true,
+                data: users,
+                message: 'Users get successfully.',
+            });
+        } else {
+            res.status(400).json({
+                status: false,
+                message: 'No users found.',
+            });
+        }
+        
+    } catch (error) {
+        res.status(400).json({
+            status: false,
+            message: error.message,
+        });
+    }
+}
 
+export const getUserByUserId = async (req, res) => {
+    try {
+        const userId = req.params.userid;
+        if(!mongoose.Types.ObjectId.isValid(userId)){
+            res.status(400).json({
+                status: false,
+                message: 'No user found.',
+            });
+        }
+        //console.log(userId);return;
+        const user = await User.findOne({_id:userId}).select('name email role');
+        //console.log(user);
+        if(user){
+            res.status(200).json({
+                status: true,
+                data: user,
+                message: 'User get successfully.',
+            });
+        } else {
+            res.status(400).json({
+                status: false,
+                message: 'No user found.',
+            });
+        }
+        
+    } catch (error) {
+        res.status(400).json({
+            status: false,
+            message: error.message,
+        });
+    }
 }
 
 export const CreateUserByAdmin = async (req, res) => {
+    const {name, email, password} = req.body;
+    if(!name || !email || !password){
+        res.status(400).json({
+            status: false,
+            message: 'No user found.',
+        });
+    }
+
+    const userByemail = await User.findOne({email});
+    if(userByemail){
+        res.status(400).json({
+            status: false,
+            message: 'User has already registered. Please try again.',
+        });
+    }
+
+    const user = new User(req.body);
+    await user.save();
+    res.status(200).json({
+        status:true,
+        data: user,
+        message: 'User successfully created',
+    });
     
 }
 
 export const updateUserByAdmin = async (req, res) => {
+    const userId = req.params.userid;
+        //console.log(userId);return;
+    if(!mongoose.Types.ObjectId.isValid(userId)){
+        res.status(400).json({
+            status: false,
+            message: 'No valid user found.',
+        });
+    }
+    if(userId === req.user.id){
+        res.status(400).json({
+            status: false,
+            message: 'Own user can not be deleted.',
+        });
+    }
+
+    const name = req.body.name;
+    const email = req.body.email;
+    const password = req.body.password;
+    const role = req.body.role;
+    if(!name){
+        res.status(400).json({
+            status: false,
+            message: 'No user found.',
+        });
+    }
+    if(email !== undefined){
+        const userByemail = await User.findOne({email});
+        if(userByemail){
+            res.status(400).json({
+                status: false,
+                message: 'User has already registered. Please try again.',
+            });
+        }        
+    }
+
+    if(role !== undefined){        
+        if(!['user', 'publisher'].includes(role)){
+            res.status(400).json({
+                status: false,
+                message: 'Error user role.',
+            });
+        }        
+    }
+
+    if(password !== undefined){
+        const encPass = await hashPassword( req.body.password );
+        req.body.password = encPass;        
+    }
     
+
+    const updateuser = await User.findByIdAndUpdate(userId, { $set: req.body}, {new: true});
+
+      res.status(200).json({
+        status:true,
+        data: updateuser,
+        message: 'User successfully updated',
+    });
+
+
 }
 
 export const deleteUserByAdmin = async (req, res) => {
+    try {
+        const userId = req.params.userid;
+        //console.log(userId);return;
+        if(!mongoose.Types.ObjectId.isValid(userId)){
+            res.status(400).json({
+                status: false,
+                message: 'No valid user found.',
+            });
+        }
+        //console.log(userId, req.user.id);
+        if(userId === req.user.id){
+            res.status(400).json({
+                status: false,
+                message: 'Own user can not be deleted.',
+            });
+        }
+        const user = await User.findOne({_id:userId}).select('name email role');
     
+        //console.log(user);
+        if(user && user.role !== 'admin'){
+            await User.deleteOne({_id:userId});
+            res.status(200).json({
+                status: true,
+                message: 'User deleted successfully.',
+            });
+        } else {
+            res.status(400).json({
+                status: false,
+                message: 'No user found.',
+            });
+        }
+        
+    } catch (error) {
+        res.status(400).json({
+            status: false,
+            message: error.message,
+        });
+    }
 }
