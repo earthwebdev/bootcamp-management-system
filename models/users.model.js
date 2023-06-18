@@ -58,19 +58,6 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
-/* userSchema.pre('save', async function (next) {    
-    const password = this.password;
-    //console.log(this.password);
-    //console.log(password);
-    //generate salt
-    const genSalt = await bcrypt.genSalt(10);
-    const encryptPassword = await bcrypt.hash(password.toString(), genSalt);
-    //console.log(encryptPassword); 
-    this.password = encryptPassword;
-    //req.body.password = encryptPassword;
-    next();
-}); */
-
 //hash token and expire reset token
 userSchema.methods.getResetToken = function(){
     const resetToken = crypto.randomBytes(20).toString('hex');

@@ -37,9 +37,4 @@ router.patch('/admin/:userid',authMiddleware, authorize('admin'), updateUserByAd
 
 router.delete('/admin/:userid',authMiddleware, authorize('admin'), deleteUserByAdmin); 
 
-//docker
-//multer
-//swagger
-//JEST
-
 export default router;

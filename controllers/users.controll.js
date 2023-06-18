@@ -247,9 +247,43 @@ export const resetPassword = async (req, res) => {
 
 export const usersListsForAdmin = async (req, res) => {
     try {
-        const users = await User.find().sort('createdAt -1');
+        //$limit = ;
+        //console.log(req.params, ' ==', req.query);
+        //const {page=1,limit=10} = req.query;
+        const limit = req.query.limit !== undefined && req.query.limit < 20? req.query.limit: 20;
+        const search = req.query.search !== undefined ? req.query.search: '';
+        const page = req.query.page !== undefined? req.query.page: 1;
+        const sortBy = req.query.sortby !== undefined? req.query.sortby: 'createdAt.desc';
+        const sortingArray = sortBy.split('.');
+        let sortData = {};
+        if(sortingArray.length > 0){
+            const sortbyname = sortingArray[0];
+            //.sort( {sortingArray[0]: sortingArray[1] === 'asc'?'1':'-1'} )  
+            const sortValue = sortingArray[1] === 'asc'?'1':'-1';   
+            sortData = {
+                [sortbyname]: sortingArray[1] === 'asc'?1:'-1',
+            }
+            console.log(sortData,sortbyname, sortingArray);
+        }
+        console.log(sortData);
+        
+        const users = await User.find({
+                                    $or: [
+                                    { name: { $regex: '.*' + search + '.*' } },
+                                    { email: { $regex: '.*' + search + '.*' } },
+                                    ],
+                                    $and:
+                                    [
+                                        
+                                        { 
+                                            role: {$ne : "admin"},
+                                        }
+                                    ],
+                                })
+                                .sort( sortData )
+                                .skip(limit * (page-1)).limit(limit);
         //console.log(users);
-        if(users){
+        if(users?.length > 0 ){
             res.status(200).json({
                 status: true,
                 data: users,
