@@ -1,6 +1,6 @@
 import BootcampModel from '../models/bootcamps.model.js';
 import cloudinary from '../config/cloudinary.conig.js';
-
+import mongoose from 'mongoose';
 
 export const getBootcamp = async(req, res) => {
     try {
@@ -57,5 +57,49 @@ export const addBootcamp = async (req, res) => {
             status: false,
             message: error.message,
         })
+    }
+}
+
+export const deleteBootcamp = async (req, res) => {
+    try {
+        const {id} = req.params;
+        if(!mongoose.Types.ObjectId.isValid(id)){
+            return res.status(400).json({
+                status: false,
+                message: 'No bootcamp founds.'
+            })
+        }
+
+        const bootcamp = await BootcampModel.findOne({_id:id});
+        console.log(bootcamp.user.toString() , req.user.id);
+        if(bootcamp){
+            if(bootcamp.user.toString() === req.user.id){
+                //delete code for teh bootcamp start
+
+                //delete code for the bootcamp end
+                return res.status(400).json({
+                    status: true,
+                    data: bootcamp,
+                    message: 'Bootcamp deleted successfully.'
+                })
+            } else {
+                return res.status(400).json({
+                    status: false,
+                    message: 'No authorize user to delete this bootcamp.'
+                })
+            }
+
+        } else {
+            return res.status(400).json({
+                status: false,
+                message: 'No bootcamp founds.'
+            })
+        }
+
+    } catch (error) {
+        return res.status(400).json({
+                status: false,
+                message: error.message
+            })
     }
 }

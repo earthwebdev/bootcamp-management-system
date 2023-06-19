@@ -1,15 +1,33 @@
-import courseModel from '../models/courses.model.js';
-import BootcampModel from '../models/courses.model.js';
+import CourseModel from '../models/courses.model.js';
+import BootcampModel from '../models/bootcamps.model.js';
+import mongoose from 'mongoose';
 export const getCourses = async (req, res) => {
     try {
-        const { bootcampId } = req.params;
-        const bootcamp = BootcampModel.findOne({_id: bootcampId});
+        const { bootcampid } = req.params;
+        //console.log(bootcampid)
+        if (!mongoose.Types.ObjectId.isValid(bootcampid)) {
+            res.status(400).json({
+              status: false,
+              message: "No valid bootcamp found.",
+            });
+          }
+        const bootcamp = await BootcampModel.findOne({ _id: bootcampid });
         if(bootcamp){
-            const courses = await courseModel.find().sort({name: 1});
+            const courses = await CourseModel.find().sort({title: 1})
+                                .populate(
+                                    { path: 'bootcamp' },
+                                )
+                                .populate(
+                                    {
+                                        path: 'user',
+                                         select: 'name email role'
+                                    }
+                                )
+                                ;
             if (courses.length > 0){
                 res.status(200).json({
                     status: true,
-                    data: bootcamp,
+                    data: courses,
                     message: 'Courses get successfully.'
                 })
             }else{
@@ -34,29 +52,38 @@ export const getCourses = async (req, res) => {
 }
 export const addCourse = async (req, res) => {
     try{
-        const { bootcampId } = req.params;
-        const bootcamp = BootcampModel.findOne({_id: bootcampId});
+        const { bootcampid } = req.params;
+        console.log(bootcampid);
+        if (!mongoose.Types.ObjectId.isValid(bootcampid)) {
+            res.status(400).json({
+              status: false,
+              message: "No valid bootcamp found.",
+            });
+          }
+        //const bootcamp = await BootcampModel.findOne({_id: bootcampid});
+        const bootcamp = await BootcampModel.findOne({ _id: bootcampid });
+        console.log(bootcamp);
         if(bootcamp){
             console.log(req.body, req.user);
             const data = req.body;
             //data.photo = uploadFile.secure_url;
             data.user = req.user.id;
-            data.bootcamp = bootcampId;
-            //req.save(data);
+            data.bootcamp = bootcampid;
+            //res.send(data);
 
             //const bootcamp = await BootcampModel.create(data);
-            const bootcamp = await new BootcampModel(data);
-            await bootcamp.save();
-            if(bootcamp){
+            const course = await new CourseModel(data);
+            await course.save();
+            if(course){
                 res.status(200).json({
                     status: true,
-                    message: 'Bootcamp created successfully.',
+                    message: 'Course created successfully.',
                     data: bootcamp
                 })
             } else {
                 res.status(404).json({
                     status: false,
-                    message: 'Unable to create bootcamp.',
+                    message: 'Unable to create Course.',
                 })
             }
 

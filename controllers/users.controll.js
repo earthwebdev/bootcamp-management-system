@@ -387,7 +387,6 @@ export const updateUserByAdmin = async (req, res) => {
       message: "No valid user found.",
     });
   }
-  
   if (userId === req.user.id) {
     res.status(400).json({
       status: false,
