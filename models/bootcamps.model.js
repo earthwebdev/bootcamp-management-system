@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import {validataionMessage} from '../constants/validataionMessage.js'
-const bootcampsSchema = mongoose.Schema({
+const bootcampSchema = mongoose.Schema({
     name: {
         type: String,
         required: [true, validataionMessage.BOOTCAMP_NAME_REQUIRED_MESSAGE ],
@@ -9,25 +9,19 @@ const bootcampsSchema = mongoose.Schema({
         minLength:[5, validataionMessage.MIN_LENGTH_MESSAGE]
     },
     slug: String,
-    descrition: {
+    description: {
         type: String,
         required: [true, validataionMessage.REQUIRED_DESCRIPTION_MESSAGE],
-        maxLength: [true, validataionMessage.MAXLENGTH_MESSAGE],
+        maxLength: [500, validataionMessage.MAXLENGTH_MESSAGE],
     },
     website:{
         type: String,
-        match:[/^(http(s):\/\/.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/g, 'Please use a valid url for your website.']
+        match:[/[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g, 'Please use a valid url for your website.']
     },
     phone:{
         type: Number,
-        max:[20, validataionMessage.MAXLENGTH_PHONE_MESSAGE]
-    },
-    email:{
-        type: String,
-        required: [true, validataionMessage.REQUIRED_EMAIL_MESSAGE],
-        unique: true,
-        match: [/^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/, validataionMessage.VALIDATE_EMAIL_MESSAGE],
-    },
+        //max:[20, validataionMessage.MAXLENGTH_PHONE_MESSAGE]
+    },    
     address:{
         type: String,
         required: [true, validataionMessage.ADDRESS_REQUIRED_MESSAGE],
@@ -75,6 +69,6 @@ const bootcampsSchema = mongoose.Schema({
 {
     timestamps: true,
 })
-const Bootcamp = mongoose.model('Bootcamp', bootcampsSchema);
+const Bootcamp = mongoose.model('Bootcamp', bootcampSchema);
 
 export default Bootcamp;
