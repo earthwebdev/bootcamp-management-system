@@ -62,8 +62,9 @@ export const loginUser = async (req, res) => {
       //console.log(matchPasswd);
       if (matchPasswd) {
         const token = jwt.sign({ id: user._id }, config.JWT_SECRET_KEY, {
-          expiresIn: "1d",
+          expiresIn: "7d",
         });
+        
         const updatedUser = await User.findOneAndUpdate(
           { _id: user._id },
           { $set: { jwt_token: token } },
@@ -73,7 +74,7 @@ export const loginUser = async (req, res) => {
         res.status(200).json({
           status: true,
           token: token,
-          message: "User successfully registered",
+          message: "User successfully login",
         });
       } else {
         res.status(400).json({

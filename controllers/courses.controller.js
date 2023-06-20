@@ -1,8 +1,17 @@
 import CourseModel from '../models/courses.model.js';
 import BootcampModel from '../models/bootcamps.model.js';
+
 import mongoose from 'mongoose';
 export const getCourses = async (req, res) => {
-    try {
+    try {  
+        if(!req.paginatedResult.status){
+
+            res.status(200).json({
+                status: false,
+                message: req.paginatedResult.message
+            })
+        }
+        console.log(req.paginatedResult);return;
         const { bootcampid } = req.params;
         //console.log(bootcampid)
         if (!mongoose.Types.ObjectId.isValid(bootcampid)) {
