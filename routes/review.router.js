@@ -1,8 +1,8 @@
 import express from "express";
-import { authMiddleware } from "../middlewares/auth.middleware";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { getReviews, createReview, updateReview, deleteReview } from '../controllers/reviews.controller.js';
-import { filteredResults } from "../middlewares/filterdResults.middleware";
-import ReviewModel from "../models/reviews.model";
+import { filteredResults } from "../middlewares/filterdResults.middleware.js";
+import ReviewModel from "../models/reviews.model.js";
 
 const router = express.Router();
 
