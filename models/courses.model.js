@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import {validataionMessage} from '../constants/validataionMessage.js'
-const coursesSchema = mongoose.Schema({
+const courseSchema = mongoose.Schema({
     title:{
         type: String,
         trim: true,
@@ -18,7 +18,7 @@ const coursesSchema = mongoose.Schema({
     minimumSkill:{
         type: String,
         required: [true, validataionMessage.REQUIRED_MINIMUMSKILL_MESSAGE],
-        enum: ['beginner', 'intermediate', 'advanced']
+        enum: ['fresher','junior','beginner', 'intermediate', 'advanced']
     },
     content:{
         type: [String],
@@ -45,6 +45,6 @@ const coursesSchema = mongoose.Schema({
     timestamps: true,
 })
 
-const Course = mongoose.model('Course', coursesSchema);
+const Course = mongoose.model('Course', courseSchema);
 
 export default Course;

@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
-import { validataionMessage } from "../constants/validataionMessage";
+import { validataionMessage } from "../constants/validataionMessage.js";
 
-const reviewsSchema = mongoose.Schema({
+const reviewSchema = mongoose.Schema({
     title:{
         type: String,
         trim: true,
         required: [true, validataionMessage.REQUIRED_REVIEW_NAME_MESSAGE],
-        maxLength: 60
+        maxLength: 100
     },
     description:{
         type: String,
@@ -23,8 +23,8 @@ const reviewsSchema = mongoose.Schema({
     },
     bootcamp:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Bootcamp',
-        required: [true, validataionMessage.REQUIRED_BOOTCAMP_ID_MESSAGE],
+        ref: 'Bootcamp'//,
+        ///required: [true, validataionMessage.REQUIRED_BOOTCAMP_ID_MESSAGE],
     },
     course:{
         type: mongoose.Schema.Types.ObjectId,
@@ -40,6 +40,6 @@ const reviewsSchema = mongoose.Schema({
     timestamps: true
 })
 
-const Course = mongoose.Schema('review', reviewsSchema);
+const Review = mongoose.model('Review', reviewSchema);
 
-export default Course;
+export default Review;
