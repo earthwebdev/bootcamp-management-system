@@ -16,32 +16,75 @@ export const getReviews = async (req, res) => {
 export const createReview = async (req, res) => {
     try {
         const {bootcamp, course} =  req.body;
-        if(bootcamp || course){
-            if(mongoose.Types.ObjectId.isValid(bootcamp) || mongoose.Types.ObjectId.isValid(course) ){
-
-            }else{
-                res.status(400).json({
-                    status:false,
-                    message: 'Bootcamp / course is not valid.',
-                })
-            }
-
-        } else {
+        req.body.user = req.user.id;
+        if(!bootcamp && !course){
             res.status(400).json({
                 status:false,
-                message: 'Bootcamp / course is required.',
+                message: 'Either Bootcamp or course is required.',
             }) 
+        }        
+        if(course){
+            if(!mongoose.Types.ObjectId.isValid(course) ){
+                return res.status(400).json({
+                    status:false,
+                    message: 'Course not found.',
+                })
+            }
+            const crse = await CourseModel.findOne({_id:course});
+            if(crse){
+                const review = postReview(req.body);
+                if(review){
+                    return res.status(200).json({
+                        status:true,
+                        data: review,
+                        message: 'Review added successfully for course.'
+                    })
+
+                }else{
+                    return res.status(400).json({
+                        status:false,
+                        message: 'Courses not found.',
+                    })
+                }
+            } else {
+                return res.status(400).json({
+                    status:false,
+                    message: 'Courses not found.',
+                }) 
+            }
         }
 
-        const data = req.body;
-        data.user = req.user.id;
-        const createData = await ReviewModel(data);
-        await createData.save();
-        res.status(200).json({
-            status:true,
-            data: createData,
-            message: 'Review created successfully.',
-        }) 
+
+        if(bootcamp){
+            if(!mongoose.Types.ObjectId.isValid(bootcamp) ){
+                return res.status(400).json({
+                    status:false,
+                    message: 'Course not found.',
+                })
+            }
+            const bcamp = await BootcampModel.findOne({_id:bootcamp});
+            if(bcamp){
+                const review = postReview(req.body);
+                if(review){
+                   return res.status(200).json({
+                        status:true,
+                        data: review,
+                        message: 'Review added successfully for bootcamp.'
+                    })
+
+                }else{
+                    return res.status(400).json({
+                        status:false,
+                        message: 'Bootcamp not found.',
+                    })
+                }
+            } else {
+                res.status(400).json({
+                    status:false,
+                    message: 'Bootcamp not found.',
+                }) 
+            }
+        }        
         
     } catch (error) {
         res.status(400).json({
@@ -49,6 +92,12 @@ export const createReview = async (req, res) => {
             message: error.message,
         })
     }
+}
+
+const postReview = async (data) => {
+    const reviewData = new ReviewModel(data);
+    await reviewData.save();
+    return reviewData;
 }
 
 export const updateReview = async (req, res) => {
