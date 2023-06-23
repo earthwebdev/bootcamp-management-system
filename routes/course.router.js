@@ -163,10 +163,10 @@ const router = express.Router();
  *         description: Course deleted successfully.
  *       404:
  *         description: The course was not found
-  *      400:
- *        description: No course found.
-  *      401:
- *        description: No authorize user to delete this review.
+ *       400:
+ *         description: No course found.
+ *       401:
+ *         description: No authorize user to delete this review.
  */
 
 
