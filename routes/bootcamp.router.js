@@ -13,13 +13,16 @@ const router = express.Router();
  *  components:
  *    schemas:
  *      Bootcamp:
- *        type: Object
+ *        type: object
  *        required:
  *          - name
  *          - description
  *          - careers
  *          - averageCost
  *        properties:
+ *          id:
+ *            type: string
+ *            description: The id of the book
  *          name:
  *            type: String
  *            description: The name of the bootcamp
@@ -46,11 +49,11 @@ const router = express.Router();
  *            description: The cost of the bootcamp
  *          averageCost:
  *            type: Array
- *            description: The available careers of the bootcamp
+ *            description: The average cost of the bootcamp
  *          Photo:
  *            type: string
  *            format: binary
- *            description: The available careers of the bootcamp
+ *            description: The photo of the bootcamp
  *        example:
  *          name: bootcamp 1
  *          description: Bootcamp 1 description
@@ -61,7 +64,7 @@ const router = express.Router();
  *          careers: ["web development"]
  *          averageRating: 5
  *          averageCost: 5000
- *          photo: file select field
+ *          photo: abc.jpg
  */ 
 
 router.get('', authMiddleware, filteredResults(Bootcamp), getBootcamp);
@@ -70,8 +73,8 @@ router.get('', authMiddleware, filteredResults(Bootcamp), getBootcamp);
  *  /bootcamps:
  *   post:
  *     tags:
- *       - Bootcamp
- *     summary: Register a user.
+ *       - Bootcamps
+ *     summary: Create a bootcamp
  *     requestBody:
  *      required: true
  *      content:
@@ -80,17 +83,63 @@ router.get('', authMiddleware, filteredResults(Bootcamp), getBootcamp);
  *           $ref: '#/components/schemas/Bootcamp'
  *     responses:
  *       '200':
- *         description: User found and logged in successfully
+ *         description: Bootcamp created successfully.
  *       '401':
- *         description: Bad username, not found in db
+ *         description: You are not authorie to access this resource
  *       '403':
- *         description: Username and password don't match
+ *         description: Unable to create bootcamp.
  *                   
  */
 router.post('', authMiddleware, authorize('publisher', 'admin'), upload.single('photo'), addBootcamp);
 
+/**
+ * @swagger
+ *  /bootcamps:
+ *   patch:
+ *     tags:
+ *       - Bootcamps
+ *     summary: Update a bootcamp
+ *     requestBody:
+ *      required: true
+ *      content:
+ *       multipart/form-data:
+ *         schema:
+ *           $ref: '#/components/schemas/Bootcamp'
+  *     responses:
+ *       '200':
+ *         description: Bootcamp updated successfully.
+ *       '401':
+ *         description: You are not authorie to access this resource
+ *       '403':
+ *         description: No bootcamp found.
+ *                   
+ */
 router.patch('/:id', authMiddleware, authorize('publisher', 'admin'), upload.single('photo'), updateBootcamp);
 
+/**
+ * @swagger
+ *   /bootcamps/{id}:
+ *    delete:
+ *     tags:
+ *       - Bootcamps
+ *     summary: Delete a bootcamp  
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         schema:
+ *           type: string
+ *         required:
+ *           - id
+ *         description: The bootcamp id 
+ *     responses:
+ *       '200':
+ *         description: Bootcamp deleted successfully.
+ *       '401':
+ *         description: No authorize user to delete this bootcamp.
+ *       '400':
+ *         description: No bootcamp found.
+ *                   
+ */
 router.delete('/:id', authMiddleware, authorize('publisher', 'admin'), deleteBootcamp);
 
 export default router;

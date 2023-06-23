@@ -66,12 +66,12 @@ export const getCourses = async (req, res) => {
 }
 export const addCourse = async (req, res) => {
     try{
-        const { bootcampid } = req.params;
+        const { bootcampid } = req.body;
         //console.log(bootcampid);
         if (!mongoose.Types.ObjectId.isValid(bootcampid)) {
             res.status(400).json({
               status: false,
-              message: "No valid bootcamp found.",
+              message: "No bootcamp found",
             });
           }
         //const bootcamp = await BootcampModel.findOne({_id: bootcampid});
@@ -95,7 +95,7 @@ export const addCourse = async (req, res) => {
                     data: bootcamp
                 })
             } else {
-                res.status(404).json({
+                res.status(403).json({
                     status: false,
                     message: 'Unable to create Course.',
                 })
@@ -182,10 +182,10 @@ export const deleteCourse = async (req, res) => {
                 return res.status(200).json({
                     status: true,
                     data: bootcamp,
-                    message: 'Review deleted successfully.'
+                    message: 'Course deleted successfully.'
                 })
             } else {
-                return res.status(400).json({
+                return res.status(401).json({
                     status: false,
                     message: 'No authorize user to delete this review.'
                 })
@@ -194,7 +194,7 @@ export const deleteCourse = async (req, res) => {
         } else {
             return res.status(400).json({
                 status: false,
-                message: 'No review founds.'
+                message: 'No course found.'
             })
         }
 

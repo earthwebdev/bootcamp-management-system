@@ -95,7 +95,7 @@ export const deleteBootcamp = async (req, res) => {
           message: "Bootcamp deleted successfully.",
         });
       } else {
-        return res.status(400).json({
+        return res.status(401).json({
           status: false,
           message: "No authorize user to delete this bootcamp.",
         });
