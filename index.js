@@ -6,6 +6,10 @@ import { dbconnection } from './config/db.config.js';
 import mongoSanitize from 'express-mongo-sanitize';
 import morgan from 'morgan';
 
+import helmet from 'helmet';
+import hpp from 'hpp';
+import cors from 'cors'
+
 dbconnection();
 
 
@@ -21,7 +25,15 @@ app.use(express.urlencoded({extended: true}));
 
 // To remove data using these defaults: //for the express mongo sanitize 
 app.use(mongoSanitize());
-app.use(morgan('combined'))
+// url log datas
+app.use(morgan('combined'));
+//security for the header field
+app.use(helmet());
+//securtiy for the html pollution parameters
+app.use(hpp());
+//Enable All CORS Requests
+app.use(cors());
+
 const PORT = config.PORT || 8080;
 const NODE_ENV = config.NODE_ENV;
 

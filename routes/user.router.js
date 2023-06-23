@@ -1,7 +1,7 @@
 import express from "express";
 
 import {registerUser, loginUser, forgetPassword, logoutUser, userProfileMe, resetPassword,
-     usersListsForAdmin, getUserByUserId, CreateUserByAdmin, updateUserByAdmin, deleteUserByAdmin} from '../controllers/users.controll.js';
+     usersListsForAdmin, getUserByUserId, CreateUserByAdmin, updateUserByAdmin, deleteUserByAdmin} from '../controllers/users.controller.js';
 import {authMiddleware, authorize} from '../middlewares/auth.middleware.js'
 
 const router = express.Router();
@@ -47,7 +47,7 @@ router.post('/login', loginUser)
 /**
  * @swagger
  *  /users/register:
- *   post:
+ *   patch:
  *     tags:
  *       - Users
  *     summary: Register a user.
@@ -67,9 +67,16 @@ router.post('/login', loginUser)
  *             name: abcdef
  *             email: abc@email.com
  *             password: Abcdefg1
+ *     responses:
+ *       '200':
+ *         description: User found and logged in successfully
+ *       '401':
+ *         description: Bad username, not found in db
+ *       '403':
+ *         description: Username and password don't match
  *                   
  */
-router.post('/register', registerUser);
+router.patch('/register', registerUser);
 
 //jwt token to undefined
 router.patch('/logout',authMiddleware, logoutUser);
