@@ -1,5 +1,6 @@
 import CourseModel from '../models/courses.model.js';
 import BootcampModel from '../models/bootcamps.model.js';
+import ReviewModel from '../models/reviews.model.js';
 
 import mongoose from 'mongoose';
 export const getCourses = async (req, res) => {
@@ -64,25 +65,54 @@ export const getCourses = async (req, res) => {
         })
     }
 }
+
+export const getCoursesById = async (req, res) => {
+    try {
+        const {id} = req.params;
+        if(!mongoose.Types.ObjectId.isValid(id)){
+            return res.status(400).json({
+                status: false,
+                message: 'The course was not found',
+            })
+        }
+
+        const course = await CourseModel.findOne({_id:id});
+        if(course){
+            return res.status(200).json({
+                status: true,
+                data: course,
+                message: 'Course details successfully.',
+            })
+
+        } else {
+            return res.status(400).json({
+                status: false,
+                message: 'The course was not found',
+            })
+        }
+    } catch (error) {
+        
+    }
+}
 export const addCourse = async (req, res) => {
     try{
-        const { bootcampid } = req.body;
+        const { bootcamp } = req.body;
         //console.log(bootcampid);
-        if (!mongoose.Types.ObjectId.isValid(bootcampid)) {
+        if (!mongoose.Types.ObjectId.isValid(bootcamp)) {
             res.status(400).json({
               status: false,
               message: "No bootcamp found",
             });
           }
         //const bootcamp = await BootcampModel.findOne({_id: bootcampid});
-        const bootcamp = await BootcampModel.findOne({ _id: bootcampid });
+        const bootcampData = await BootcampModel.findOne({ _id: bootcamp });
         //console.log(bootcamp);
-        if(bootcamp){
+        if(bootcampData){
             console.log(req.body, req.user);
             const data = req.body;
             //data.photo = uploadFile.secure_url;
             data.user = req.user.id;
-            data.bootcamp = bootcampid;
+            data.bootcamp = bootcamp;
             //res.send(data);
 
             //const bootcamp = await BootcampModel.create(data);
@@ -118,7 +148,7 @@ export const addCourse = async (req, res) => {
 
 export const updateCourse = async (req, res) => {
     try {
-        const {id } = req.params;
+        const { id } = req.params;
 
         const {isImageUPdated} = req.body;
 
@@ -162,7 +192,7 @@ export const deleteCourse = async (req, res) => {
         if(!mongoose.Types.ObjectId.isValid(id)){
             return res.status(400).json({
                 status: false,
-                message: 'No course founds.'
+                message: 'No course found.'
             })
         }
 
@@ -187,7 +217,7 @@ export const deleteCourse = async (req, res) => {
             } else {
                 return res.status(401).json({
                     status: false,
-                    message: 'No authorize user to delete this review.'
+                    message: 'No authorize user to delete this course.'
                 })
             }
 

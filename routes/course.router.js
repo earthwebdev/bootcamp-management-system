@@ -1,5 +1,5 @@
 import express from "express";
-import { addCourse, getCourses, updateCourse, deleteCourse } from "../controllers/courses.controller.js";
+import { addCourse, getCourses, getCoursesById, updateCourse, deleteCourse } from "../controllers/courses.controller.js";
 import {authMiddleware, authorize} from '../middlewares/auth.middleware.js'
 import { filteredResults } from "../middlewares/filterdResults.middleware.js";
 import CourseModel from '../models/courses.model.js';
@@ -111,13 +111,15 @@ const router = express.Router();
  *         description: The course id
  *     responses:
  *       200:
- *         description: The course response by id
+ *         description: The Course details successfully
  *         contens:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Course'
- *       404:
+ *       400:
  *         description: The course was not found
+ *       401:
+ *         description: No authorize user to delete this course.
  *   patch:
  *    summary: Update the course by the id
  *    tags: [Courses]
@@ -145,8 +147,6 @@ const router = express.Router();
  *        description: You are not authorized to access this resource.
  *      400:
  *        description: No course found.
- *      500:
- *        description: Some error happened
  *   delete:
  *     summary: Remove the course by id
  *     tags: [Courses]
@@ -161,16 +161,15 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: Course deleted successfully.
- *       404:
- *         description: The course was not found
  *       400:
  *         description: No course found.
  *       401:
- *         description: No authorize user to delete this review.
+ *         description: No authorize user to delete this course.
  */
 
 
 router.get('/', authMiddleware, filteredResults(CourseModel), getCourses);
+router.get('/:id', authMiddleware, getCoursesById);
 router.post('/', authMiddleware, authorize('publisher', 'admin'), addCourse);
 
 router.patch('/:id', authMiddleware, authorize('publisher', 'admin'), updateCourse);
