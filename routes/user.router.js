@@ -94,7 +94,7 @@ router.put('/forgotpassword', forgetPassword);
 /**
  * @swagger
  * /users/resetpassword/{resettoken}:
- *   get:
+ *   post:
  *     tags:
  *       - Users
  *     name: Reset Password Link
@@ -115,7 +115,7 @@ router.put('/forgotpassword', forgetPassword);
  *       '403':
  *         description: Password reset link is invalid or has expired
  */
-router.get('/resetpassword/:resettoken', resetPassword);
+router.post('/resetpassword/:resettoken', resetPassword);
 
 //only admin previlage
 router.get('/admin',authMiddleware, authorize('admin'), usersListsForAdmin);

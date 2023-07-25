@@ -11,17 +11,17 @@ export const getCourses = async (req, res) => {
             //console.log(Object.values(bootcamp)[0])
             const bootcampid = Object.values(bootcamp)[0];
             if (!mongoose.Types.ObjectId.isValid(bootcampid)) {
-                res.status(400).json({
-                status: false,
+                return res.status(400).json({
+                success: false,
                 message: "No valid bootcamp found.",
                 });
             }
             const bootcampData = await BootcampModel.findOne({ _id: bootcampid });
             if(bootcamp){ */
-                res.status(200).json(res.filteredResults);
+                return res.status(200).json(res.filteredResults);
             /* }else{
-                res.status(404).json({
-                    status: false,
+                return res.status(404).json({
+                    success: false,
                     message: 'No bootcamp found',
                 })
             } */
@@ -40,27 +40,27 @@ export const getCourses = async (req, res) => {
                                 )
                                 ;
             if (courses.length > 0){
-                res.status(200).json({
-                    status: true,
+                return res.status(200).json({
+                    success: true,
                     data: courses,
                     message: 'Courses get successfully.'
                 })
             }else{
-                res.status(404).json({
-                    status: false,
+                return res.status(404).json({
+                    success: false,
                     message: 'Courses not found',
                 })
             }
         } else {
-            res.status(404).json({
-                status: false,
+            return res.status(404).json({
+                success: false,
                 message: 'Bootcamp not found',
             })
         } */
         
     } catch (error) {
-        res.status(404).json({
-            status: false,
+        return res.status(404).json({
+            success: false,
             message: error.message,
         })
     }
@@ -71,7 +71,7 @@ export const getCoursesById = async (req, res) => {
         const {id} = req.params;
         if(!mongoose.Types.ObjectId.isValid(id)){
             return res.status(400).json({
-                status: false,
+                success: false,
                 message: 'The course was not found',
             })
         }
@@ -79,14 +79,14 @@ export const getCoursesById = async (req, res) => {
         const course = await CourseModel.findOne({_id:id});
         if(course){
             return res.status(200).json({
-                status: true,
+                success: true,
                 data: course,
                 message: 'Course details successfully.',
             })
 
         } else {
             return res.status(400).json({
-                status: false,
+                success: false,
                 message: 'The course was not found',
             })
         }
@@ -99,8 +99,8 @@ export const addCourse = async (req, res) => {
         const { bootcamp } = req.body;
         //console.log(bootcampid);
         if (!mongoose.Types.ObjectId.isValid(bootcamp)) {
-            res.status(400).json({
-              status: false,
+            return res.status(400).json({
+              success: false,
               message: "No bootcamp found",
             });
           }
@@ -113,34 +113,34 @@ export const addCourse = async (req, res) => {
             //data.photo = uploadFile.secure_url;
             data.user = req.user.id;
             data.bootcamp = bootcamp;
-            //res.send(data);
+            //return res.send(data);
 
             //const bootcamp = await BootcampModel.create(data);
             const course = await new CourseModel(data);
             await course.save();
             if(course){
-                res.status(200).json({
-                    status: true,
+                return res.status(200).json({
+                    success: true,
                     message: 'Course created successfully.',
                     data: bootcamp
                 })
             } else {
-                res.status(403).json({
-                    status: false,
+                return res.status(403).json({
+                    success: false,
                     message: 'Unable to create Course.',
                 })
             }
 
         } else {
-            res.status(404).json({
-                status: false,
+            return res.status(404).json({
+                success: false,
                 message: 'No bootcamp found',
             })
         }        
 
     }catch(error){
-        res.status(404).json({
-            status: false,
+        return res.status(404).json({
+            success: false,
             message: error.message,
         })
     }
@@ -156,7 +156,7 @@ export const updateCourse = async (req, res) => {
         const data = req.body;
         if(!courseData){
             return res.status(400).json({
-                status:false,
+                success:false,
                 message: 'No course found.'
             })
         }
@@ -165,7 +165,7 @@ export const updateCourse = async (req, res) => {
 
         }else{
             return res.status(401).json({
-                status:false,
+                success:false,
                 message: 'You are not authorized to access this resource.'
             })
         }        
@@ -173,14 +173,14 @@ export const updateCourse = async (req, res) => {
         const updatedCourse = await CourseModel.findOneAndUpdate({_id:id}, {$set: data}, {new:true});
         if(updatedCourse){
             return res.status(200).json({
-                status: true,
+                success: true,
                 data: updatedCourse,
                 message: 'Course updated successfully.'
             })
         }
     } catch (error) {
         return res.status(400).json({
-            status: false,
+            success: false,
             message: error.message
         })
     }
@@ -191,7 +191,7 @@ export const deleteCourse = async (req, res) => {
         const {id} = req.params;
         if(!mongoose.Types.ObjectId.isValid(id)){
             return res.status(400).json({
-                status: false,
+                success: false,
                 message: 'No course found.'
             })
         }
@@ -210,27 +210,27 @@ export const deleteCourse = async (req, res) => {
                 
                 //delete code for the bootcamp end
                 return res.status(200).json({
-                    status: true,
+                    success: true,
                     data: bootcamp,
                     message: 'Course deleted successfully.'
                 })
             } else {
                 return res.status(401).json({
-                    status: false,
+                    success: false,
                     message: 'No authorize user to delete this course.'
                 })
             }
 
         } else {
             return res.status(400).json({
-                status: false,
+                success: false,
                 message: 'No course found.'
             })
         }
 
     } catch (error) {
         return res.status(400).json({
-                status: false,
+                success: false,
                 message: error.message
             })
     }

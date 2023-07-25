@@ -57,10 +57,10 @@ export const filteredResults = (Model) => async (req, res, next) => {
                 limit
             };
         }
-        console.log(models.length);
+        //console.log(models.length);
         if (models.length > 0){
             res.filteredResults = {
-                status: true,
+                success: true,
                 data: models,
                 pagination,
                 total
@@ -68,7 +68,7 @@ export const filteredResults = (Model) => async (req, res, next) => {
             next();                        
         }else{            
            return res.status(404).json({
-                status: false,
+                success: false,
                 message: `No ${Model.collection.collectionName} found`,
             })
         }

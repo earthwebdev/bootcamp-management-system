@@ -13,8 +13,8 @@ export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "Please enter name, email and password",
       });
     }
@@ -23,22 +23,22 @@ export const registerUser = async (req, res) => {
     const user = await User.findOne({ email });
     //console.log(user);
     if (user) {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "The user has already registered.",
       });
     } else {
       const user = new User(req.body);
       await user.save();
-      res.status(200).json({
-        status: true,
+      return res.status(200).json({
+        success: true,
         data: user,
         message: "User successfully registered",
       });
     }
   } catch (error) {
-    res.status(400).json({
-      status: false,
+    return res.status(400).json({
+      success: false,
       message: error.message,
     });
   }
@@ -48,8 +48,8 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "Please enter email and password",
       });
     }
@@ -71,26 +71,29 @@ export const loginUser = async (req, res) => {
           { new: true }
         );
 
-        res.status(200).json({
-          status: true,
-          token: token,
+        return res.status(200).json({
+          success: true,
+          data:{
+            token: updatedUser.jwt_token,
+            role: updatedUser.role, 
+          },          
           message: "User successfully login",
         });
       } else {
-        res.status(400).json({
-          status: false,
+        return res.status(400).json({
+          success: false,
           message: "Please enter the correct email and password.",
         });
       }
     } else {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "Please enter the correct email and password.",
       });
     }
   } catch (error) {
-    res.status(400).json({
-      status: false,
+    return res.status(400).json({
+      success: false,
       message: error.message,
     });
   }
@@ -104,20 +107,20 @@ export const userProfileMe = async (req, res) => {
     );
     //console.log(user.jwt_token);
     if (user) {
-      res.status(200).json({
-        status: true,
+      return res.status(200).json({
+        success: true,
         data: user,
         message: "User profile fetch successfully",
       });
     } else {
-      res.status(200).json({
-        status: false,
+      return res.status(200).json({
+        success: false,
         message: "No user found",
       });
     }
   } catch (error) {
-    res.status(400).json({
-      status: false,
+    return res.status(400).json({
+      success: false,
       message: error.message,
     });
   }
@@ -134,19 +137,19 @@ export const logoutUser = async (req, res) => {
         { $set: { jwt_token: "undefined" } },
         { new: true }
       );
-      res.status(200).json({
-        status: true,
+      return res.status(200).json({
+        success: true,
         message: "User successfully logout",
       });
     } else {
-      res.status(200).json({
-        status: false,
+      return res.status(200).json({
+        success: false,
         message: "User has already logout",
       });
     }
   } catch (error) {
-    res.status(400).json({
-      status: false,
+    return res.status(400).json({
+      success: false,
       message: error.message,
     });
   }
@@ -159,17 +162,17 @@ export const forgetPassword = async (req, res) => {
     //.select('name email  resetPasswordToken resetPasswordExpired');
     //console.log(user);return;
     if (!user) {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "No user found",
       });
     }
 
     const resetToken = user.getResetToken();
-    console.log(resetToken);
+    //console.log(resetToken);
     const mailMessage =
-      "your are using. Your reset token is " +
-      resetToken +
+      "your are using. Your reset token is <a href='http://localhost:5173/resetpassword/" +
+      resetToken + "'>Click here to reset password</a>" +
       "<br> your token will expire in ten minutes.";
     //console.log(user);
     try {
@@ -186,18 +189,18 @@ export const forgetPassword = async (req, res) => {
       user.resetPasswordToken = "";
       user.resetPasswordExpired = "";
       await user.save({ validateBeforeSave: false });
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: error.message,
       });
     }
     return res.status(200).json({
-      status: true,
+      success: true,
       message: "Email sent successfully.",
     });
   } catch (error) {
-    res.status(400).json({
-      status: false,
+    return res.status(400).json({
+      success: false,
       message: error.message,
     });
   }
@@ -212,18 +215,18 @@ export const resetPassword = async (req, res) => {
       .createHash("sha512")
       .update(resetToken)
       .digest("hex");
-    //console.log(hashToken)
+    console.log(hashToken, ' === ', resetToken)
     const user = await User.findOne({
       resetPasswordToken: hashToken,
       resetPasswordExpired: { $gte: new Date() },
     });
-
+//console.log(user);
     if (!user) {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "Invalid password token / password expired",
       });
-    }
+    }	
 
     const hashPass = await hashPassword(req.body.password);
     const data = {
@@ -239,13 +242,13 @@ export const resetPassword = async (req, res) => {
       }
     );
 
-    res.status(200).json({
-      status: true,
+    return res.status(200).json({
+      success: true,
       message: "Password reset successfully",
     });
   } catch (error) {
-    res.status(200).json({
-      status: false,
+    return res.status(200).json({
+      success: false,
       message: error.message,
     });
   }
@@ -302,20 +305,20 @@ export const usersListsForAdmin = async (req, res) => {
       .limit(limit);
     //console.log(users);
     if (users?.length > 0) {
-      res.status(200).json({
-        status: true,
+      return res.status(200).json({
+        success: true,
         data: users,
         message: "Users get successfully.",
       });
     } else {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "No users found.",
       });
     }
   } catch (error) {
-    res.status(400).json({
-      status: false,
+    return res.status(400).json({
+      success: false,
       message: error.message,
     });
   }
@@ -325,8 +328,8 @@ export const getUserByUserId = async (req, res) => {
   try {
     const userId = req.params.userid;
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "No user found.",
       });
     }
@@ -334,20 +337,20 @@ export const getUserByUserId = async (req, res) => {
     const user = await User.findOne({ _id: userId }).select("name email role");
     //console.log(user);
     if (user) {
-      res.status(200).json({
-        status: true,
+      return res.status(200).json({
+        success: true,
         data: user,
         message: "User get successfully.",
       });
     } else {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "No user found.",
       });
     }
   } catch (error) {
-    res.status(400).json({
-      status: false,
+    return res.status(400).json({
+      success: false,
       message: error.message,
     });
   }
@@ -356,24 +359,24 @@ export const getUserByUserId = async (req, res) => {
 export const CreateUserByAdmin = async (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
-    res.status(400).json({
-      status: false,
+    return res.status(400).json({
+      success: false,
       message: "No user found.",
     });
   }
 
   const userByemail = await User.findOne({ email });
   if (userByemail) {
-    res.status(400).json({
-      status: false,
+    return res.status(400).json({
+      success: false,
       message: "User has already registered. Please try again.",
     });
   }
 
   const user = new User(req.body);
   await user.save();
-  res.status(200).json({
-    status: true,
+  return res.status(200).json({
+    success: true,
     data: user,
     message: "User successfully created",
   });
@@ -383,14 +386,14 @@ export const updateUserByAdmin = async (req, res) => {
   const userId = req.params.userid;
   //console.log(userId);return;
   if (!mongoose.Types.ObjectId.isValid(userId)) {
-    res.status(400).json({
-      status: false,
+    return res.status(400).json({
+      success: false,
       message: "No valid user found.",
     });
   }
   if (userId === req.user.id) {
-    res.status(400).json({
-      status: false,
+    return res.status(400).json({
+      success: false,
       message: "Own user can not be deleted.",
     });
   }
@@ -400,16 +403,16 @@ export const updateUserByAdmin = async (req, res) => {
   const password = req.body.password;
   const role = req.body.role;
   if (!name) {
-    res.status(400).json({
-      status: false,
+    return res.status(400).json({
+      success: false,
       message: "No user found.",
     });
   }
   if (email !== undefined) {
     const userByemail = await User.findOne({ email });
     if (userByemail) {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "User has already registered. Please try again.",
       });
     }
@@ -417,8 +420,8 @@ export const updateUserByAdmin = async (req, res) => {
 
   if (role !== undefined) {
     if (!["user", "publisher"].includes(role)) {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "Error user role.",
       });
     }
@@ -435,8 +438,8 @@ export const updateUserByAdmin = async (req, res) => {
     { new: true }
   );
 
-  res.status(200).json({
-    status: true,
+  return res.status(200).json({
+    success: true,
     data: updateuser,
     message: "User successfully updated",
   });
@@ -447,15 +450,15 @@ export const deleteUserByAdmin = async (req, res) => {
     const userId = req.params.userid;
     //console.log(userId);return;
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "No valid user found.",
       });
     }
     //console.log(userId, req.user.id);
     if (userId === req.user.id) {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "Own user can not be deleted.",
       });
     }
@@ -464,19 +467,19 @@ export const deleteUserByAdmin = async (req, res) => {
     //console.log(user);
     if (user && user.role !== "admin") {
       await User.deleteOne({ _id: userId });
-      res.status(200).json({
-        status: true,
+      return res.status(200).json({
+        success: true,
         message: "User deleted successfully.",
       });
     } else {
-      res.status(400).json({
-        status: false,
+      return res.status(400).json({
+        success: false,
         message: "No user found.",
       });
     }
   } catch (error) {
-    res.status(400).json({
-      status: false,
+    return res.status(400).json({
+      success: false,
       message: error.message,
     });
   }
