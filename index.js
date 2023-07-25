@@ -12,9 +12,6 @@ import cors from 'cors'
 
 dbconnection();
 
-
-
-
 const app = express();
 
 //json data error setting
@@ -28,7 +25,13 @@ app.use(mongoSanitize());
 // url log datas
 app.use(morgan('combined'));
 //security for the header field
-app.use(helmet());
+const cspDefaults = helmet.contentSecurityPolicy.getDefaultDirectives();
+delete cspDefaults['upgrade-insecure-requests'];
+
+app.use(helmet({
+    contentSecurityPolicy: { directives: cspDefaults }
+}));
+//app.use(helmet());
 //securtiy for the html pollution parameters
 app.use(hpp());
 //Enable All CORS Requests
